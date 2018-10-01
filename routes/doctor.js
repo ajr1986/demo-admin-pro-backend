@@ -1,29 +1,29 @@
 var express = require('express');
-var bcrypt = require('bcryptjs');
+
 var config = require('../config/config');
 
 var mwAuthentication = require('../middleware/authentication');
 
 var app = express();
 
-var User = require('../modules/user');
+var Doctor = require('../modules/doctor');
 
 //========================================
-// Get users
+// Get doctors
 //========================================
 app.get('/', (req, res, next) => {
 
     var p = req.query.p || 0;
-    var p = p * config.PAGE_SIZE;
+    p = p * config.PAGE_SIZE;
 
     var total = 0;
 
-    User.count().exec((err, qty) => {
+    Doctor.count().exec((err, qty) => {
 
         if(err){
             return res.status(500).json({
                 ok: false,
-                message: 'Fail to count users',
+                message: 'Fail to count doctors',
                 errors: err
             });
         }
@@ -31,142 +31,129 @@ app.get('/', (req, res, next) => {
         total = qty;
     });
 
-    User.find({}, "name email img role")
+    Doctor.find()
     .skip(p)
     .limit(config.PAGE_SIZE)
-    .exec( (err, users) => {
+    .populate('user', 'name email')
+    .populate('hospital')
+    .exec((err, doctors) => {
 
         if(err){
 
             return res.status(500).json({
                 ok: false,
-                message: "Fail to get users",
+                message: 'Fail to get doctors',
                 errors: err
             });
         }
 
         res.status(200).json({
             ok: true,
-            users: users,
+            doctors: doctors,
             total: total
         });
-
-    })
+    });
 });
 
 //========================================
-// Create user
+// Post doctor
 //========================================
 app.post('/', mwAuthentication.tokenValidation, (req, res, next) => {
 
-    var body = req.body;
-
-    var user = new User({
-        name: body.name,
-        email: body.email,
-        password: bcrypt.hashSync(body.password, 10),
-        img: body.img,
-        role: body.role
+    var doctor = new Doctor({
+        name: req.body.name,
+        img: req.body.img,
+        user: req.user._id,
+        hospital: req.body.hospital
     });
 
-    user.save( (err, userPersisted ) => {
+    doctor.save((err, doctorPersisted) => {
 
         if(err){
 
-            return res.status(400).json({
+            return res.status(500).json({
                 ok: false,
-                message: "Fail to create user",
+                message: 'Fail to create doctor',
                 errors: err
             });
         }
 
         res.status(201).json({
             ok: true,
-            user: userPersisted
+            doctor: doctorPersisted
         });
     });
 });
 
 //========================================
-// Update user
+// Put doctor
 //========================================
-app.put("/:id", mwAuthentication.tokenValidation, (req, res, next) => {
+app.put('/:id', mwAuthentication.tokenValidation, (req, res, next) => {
 
     var id = req.params.id;
 
-    User.findById(id, (err, user) => {
+    var doctor = {
+        name: req.body.name,
+        img: req.body.img,
+        user: req.user._id,
+        hospital: req.body.hospital
+    };
+
+    Doctor.findByIdAndUpdate(id, doctor, {new: true}, (err, doctorUpdated) => {
 
         if(err){
 
             return res.status(500).json({
                 ok: false,
-                message: "Fail to get user",
+                message: 'Fail to update doctor',
                 errors: err
             });
         }
 
-        if(!user){
+        if(!doctorUpdated){
 
             return res.status(400).json({
                 ok: false,
-                message: "User does not exist"
-            });
-        }
-
-        var body = req.body;
-
-        user.name = body.name;
-        user.email = body.email;
-        user.role = body.role;
-
-        user.save((err, userUpdated) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    ok: false,
-                    message: "Fail to update user",
-                    errors: err
-                });
-            }
-
-            res.status(200).json({
-                ok: true,
-                user: userUpdated
-            });
-        });
-    });
-});
-
-//========================================
-// Delete user
-//========================================
-app.delete("/:id", mwAuthentication.tokenValidation, (req, res, next) => {
-
-    var id = req.params.id;
-
-    User.findByIdAndRemove(id, (err, userDeleted) => {
-
-        if(err){
-
-            return res.status(500).json({
-                ok: false,
-                message: "Fail to delete user",
-                errors: err
-            });
-        }
-
-        if(!userDeleted){
-
-            return res.status(400).json({
-                ok: false,
-                message: "User does not exist"
+                message: 'Doctor does not exist'
             });
         }
 
         res.status(200).json({
             ok: true,
-            user: userDeleted
+            doctor: doctorUpdated
+        });
+    });
+});
+
+//========================================
+// Delete doctor
+//========================================
+app.delete('/:id', mwAuthentication.tokenValidation, (req, res, next) => {
+
+    var id = req.params.id;
+
+    Doctor.findByIdAndRemove(id, (err, doctorDeleted) => {
+
+        if(err){
+
+            return res.status(500).json({
+                ok: false,
+                message: 'Fail to delete doctor',
+                errors: err
+            });
+        }
+
+        if(!doctorDeleted){
+
+            return res.status(400).json({
+                ok: false,
+                message: 'Doctor does not exist'
+            });
+        }
+
+        res.status(200).json({
+            ok: true,
+            doctor: doctorDeleted
         });
     });
 });
