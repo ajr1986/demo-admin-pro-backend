@@ -57,7 +57,7 @@ app.get('/', (req, res, next) => {
 //========================================
 // Create user
 //========================================
-app.post('/', mwAuthentication.tokenValidation, (req, res, next) => {
+app.post('/', (req, res, next) => {
 
     var body = req.body;
 
