@@ -31,7 +31,7 @@ app.get('/', (req, res, next) => {
         total = qty;
     });
 
-    User.find({}, "name email img role")
+    User.find({}, "name email img role google")
     .skip(p)
     .limit(config.PAGE_SIZE)
     .exec( (err, users) => {

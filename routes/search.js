@@ -124,7 +124,7 @@ function searchUsers(text, regex){
 
     return new Promise( (resolve, reject) => {
 
-        User.find({}, 'name email role')
+        User.find({}, 'name email role google')
         .or( { name: regex }, { email: regex })
         .exec((err, users) => {
 
