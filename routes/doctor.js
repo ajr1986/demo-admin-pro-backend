@@ -56,6 +56,34 @@ app.get('/', (req, res, next) => {
 });
 
 //========================================
+// Get doctor
+//========================================
+app.get('/:id', (req, res, next) => {
+
+    var id = req.params.id;
+
+    Doctor.findById(id)
+    .populate('user', 'name email')
+    .populate('hospital')
+    .exec((err, doctor) => {
+
+        if(err){
+
+            return res.status(500).json({
+                ok: false,
+                message: 'Fail to get doctors',
+                errors: err
+            });
+        }
+
+        res.status(200).json({
+            ok: true,
+            doctor: doctor
+        });
+    });
+});
+
+//========================================
 // Post doctor
 //========================================
 app.post('/', mwAuthentication.tokenValidation, (req, res, next) => {

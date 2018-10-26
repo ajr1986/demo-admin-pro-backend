@@ -55,6 +55,39 @@ app.get('/', (req, res, next) => {
 });
 
 //========================================
+// Get hospitals
+//========================================
+app.get('/:id', (req, res, next) => {
+
+    var id = req.params.id;
+
+    Hospital.findById(id)
+        .populate('user', 'name img email')
+        .exec((err, hospital) => {
+
+            if(err){
+                return res.status(500).json({
+                    ok: false,
+                    message: 'Fail to get hospital',
+                    errors: err
+                });
+            }
+
+            if(!hospital){
+                return res.status(400).json({
+                    ok: false,
+                    message: 'Hospital does not exist'
+                });
+            }
+
+            rest.status(200).json({
+                ok: true,
+                hospital: hospital
+            });
+        });
+});
+
+//========================================
 // Post hospital
 //========================================
 app.post('/', mwAuthentication.tokenValidation, (req, res, next) => {
