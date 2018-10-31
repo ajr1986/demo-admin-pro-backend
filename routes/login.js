@@ -56,7 +56,8 @@ app.post("/", (req, res, next) => {
             message: "Login ok",
             user: user,
             id: user.id,
-            token: token
+            token: token,
+            menu: getMenu(user.role)
         });
 
     });
@@ -103,7 +104,8 @@ app.post('/google', async (req, res, next) => {
                     message: "Login ok",
                     user: user,
                     id: user.id,
-                    token: token
+                    token: token,
+                    menu: getMenu(user.role)
                 });
 
             } else {
@@ -143,7 +145,8 @@ app.post('/google', async (req, res, next) => {
                     message: "Login ok",
                     user: userSaved,
                     id: userSaved.id,
-                    token: token
+                    token: token,
+                    menu: getMenu(userSaved.role)
                 });
             });
         }
@@ -167,6 +170,41 @@ async function verify(token) {
         img: payload.picture,
         google: true
     };
+}
+
+
+function getMenu(ROLE){
+
+    var menu = [
+        {
+          title: 'Main',
+          icon: 'mdi mdi-gauge',
+          submenu: [
+            { title: 'Dashboard', url: '/dashboard'},
+            { title: 'Progress', url: '/progress'},
+            { title: 'Charts', url: '/charts'},
+            { title: 'Promises', url: '/promises'},
+            { title: 'Rxjs', url: '/rxjs'}
+          ]
+        },
+        {
+          title: 'Admin',
+          icon: 'mdi mdi-folder-lock-open',
+          submenu: [
+            {title: 'Hospitals', url: '/hospitals'},
+            {title: 'Doctors', url: '/doctors'},
+          ]
+        }
+      ];
+      
+      if(ROLE == 'ADMIN_ROLE'){
+
+        menu[1].submenu.unshift(
+            {title: 'Users', url: '/users'}
+        );
+      }
+
+    return menu;
 }
 
 

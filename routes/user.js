@@ -90,7 +90,7 @@ app.post('/', (req, res, next) => {
 //========================================
 // Update user
 //========================================
-app.put("/:id", mwAuthentication.tokenValidation, (req, res, next) => {
+app.put("/:id", [mwAuthentication.tokenValidation, mwAuthentication.adminRoleValidation], (req, res, next) => {
 
     var id = req.params.id;
 
@@ -141,7 +141,7 @@ app.put("/:id", mwAuthentication.tokenValidation, (req, res, next) => {
 //========================================
 // Delete user
 //========================================
-app.delete("/:id", mwAuthentication.tokenValidation, (req, res, next) => {
+app.delete("/:id", [mwAuthentication.tokenValidation, mwAuthentication.adminRoleValidation], (req, res, next) => {
 
     var id = req.params.id;
 

@@ -13,7 +13,7 @@ module.exports.tokenValidation = function(req, res, next){
 
         if(err){
 
-            res.status(401).json({
+            return res.status(401).json({
                 ok: false,
                 message: "Invalid token",
                 errors: err
@@ -24,4 +24,26 @@ module.exports.tokenValidation = function(req, res, next){
 
         next();
     });
+};
+
+//========================================
+// Validate admin role
+//========================================
+module.exports.adminRoleValidation = function(req, res, next){
+
+    var user = req.user;
+    var id = req.params.id;
+
+    if(user.role == 'ADMIN_ROLE' || user.id == id){
+
+        next();
+        return;
+
+    } else {
+
+        return res.status(401).json({
+            ok: false,
+            message: "Invalid Role"
+        });
+    }
 };
