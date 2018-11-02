@@ -13,6 +13,8 @@ var app = express();
 
 var User = require('../modules/user');
 
+var mwAuthentication = require('../middleware/authentication');
+
 //========================================
 // Normal Authentication
 //========================================
@@ -206,6 +208,21 @@ function getMenu(ROLE){
 
     return menu;
 }
+
+//========================================
+// Renew token
+//========================================
+app.get("/renew", mwAuthentication.tokenValidation, (req, res, next) => {
+
+    var token = jwt.sign({user: req.user}, config.SEED, {expiresIn: 3600}); // 1 hour
+
+    return res.status(200).json({
+        ok: true,
+        message: "Renew login ok",
+        user: req.user,
+        token: token
+    });
+});
 
 
 module.exports = app;
